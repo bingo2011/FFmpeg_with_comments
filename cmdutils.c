@@ -427,20 +427,36 @@ int locate_option(int argc, char **argv, const OptionDef *options,
     const OptionDef *po;
     int i;
 
+//step1
+//loop through command options to check if there is optname in it
     for (i = 1; i < argc; i++) {
         const char *cur_opt = argv[i];
 
+//step2
+//only the options that start with '-' are valid; otherwise, next one
         if (*cur_opt++ != '-')
             continue;
 
+//step3
+//compare the name of an option that has stripped '-' with all options that are pre-defined in FFmpeg_opt.c
+//the type of return result is OptionDef* 
         po = find_option(options, cur_opt);
+
+//SPECIAL CASE, -nostat
+//if po->name == NULL and -noxxx, optname is xxx, 
         if (!po->name && cur_opt[0] == 'n' && cur_opt[1] == 'o')
             po = find_option(options, cur_opt + 2);
 
+//SPECIAL CASE
+//if cur_opt is not in options,  and cur_opt == optname
         if ((!po->name && !strcmp(cur_opt, optname)) ||
+//NORMAL CASE
+//or if cur_opt is found in options, and po->name == optname,
              (po->name && !strcmp(optname, po->name)))
             return i;
 
+//step4
+//if this option has argument, skip the next one
         if (po->flags & HAS_ARG)
             i++;
     }
